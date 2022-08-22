@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Speaking Speed Trainer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" media="all" href="main.css">
+    <script src="main.js"></script>
+  </head>
+  <body>
+    <span class="container">
+      <h1>Speaking Speed Trainer</h1>
+      
+      <table class="borderless">
+        <tbody>
+          <tr>
+            <td style="font-size:20px; text-align: right;">Text:</td>
+            <td><textarea rows="7" cols="50" id="text_to_speak"></textarea></td>
+          </tr>
+          <tr>
+            <td style="font-size:20px;">Words Per Minute:</td>
+            <td><input type="number" min="1" max="500" step="1" value="150" id="wpm"></td>
+          </tr>
+          <tr>
+            <td style="font-size:20px;">Allow Reading Ahead:</td>
+            <td><input type="checkbox" name="show_ahead" id="show_ahead"></td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+      <button onclick="StartReading();">Start</button>
+      <br>
+      <span id="reading_words"></span>
+    </span>
+
+    <div id="read_cursor">|</div>
+  </body>
+</html>
