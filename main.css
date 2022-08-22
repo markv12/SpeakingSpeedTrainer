@@ -45,17 +45,15 @@ table tr.borderless td{
   max-width: 750px;
 }
 
-.word_tag {
-  display: inline-block;
-  padding: 3px;
+.read_line {
   font-size: 20px;
-}
-
-.selected_word_tag {
-  background: #d4cbe6;
-  border-radius: 5px;
+  display: inline-block;
+  padding-top:  5px;
 }
 
 #read_cursor {
   position: absolute;
+  font-size: 30px;
+  font-weight: bold;
+  color: #6e51a9;
 }

@@ -1,5 +1,4 @@
-let words = [];
-let word_tags = [];
+let lines = [];
 let read_cursor = null;
 
 function StartReading(){
@@ -9,46 +8,75 @@ function StartReading(){
   let wpm_field = document.getElementById("wpm");
   let msPerWord = 60000.0/wpm.value;
   let word_count = words.length;
-  let char_count = GetCharCount(words);
+  let total_char_count = GetCharCount(words);
   let totalMS = msPerWord * word_count;
-  msPerChar = totalMS / char_count;
+  let msPerChar = totalMS / total_char_count;
+
+  ShowInfo(word_count, totalMS);
 
   let reading_words_area = document.getElementById("reading_words");
   while (reading_words_area.firstChild) {
     reading_words_area.removeChild(reading_words_area.firstChild);
   }
-  word_tags = [];
+  let lineTags = [];
   words.forEach(function(word){
-    let word_tag = document.createElement("div");
-    word_tag.classList.add("word_tag");
-    word_tag.innerHTML = word;
-    reading_words_area.appendChild(word_tag);
-    console.log(word_tag.offsetWidth);
-    word_tags.push(word_tag);
+    let current_line = lineTags[lineTags.length-1];
+    if(current_line){
+      let oldHTML = current_line.innerHTML;
+      current_line.innerHTML += word + " ";
+      if(current_line.offsetWidth >= 750){
+        current_line.innerHTML = oldHTML;
+        lineTags.push(AddNewLine(word, reading_words_area));
+      }
+    } else {
+      lineTags.push(AddNewLine(word, reading_words_area));
+    }
+  });
+  lines = lineTags.map(function(line_tag){
+    let lineTagRect = line_tag.getBoundingClientRect();
+    let lineCharCount = line_tag.innerHTML.length;
+    return {
+      line_tag : line_tag,
+      left : lineTagRect.left,
+      right : lineTagRect.right,
+      center : (lineTagRect.top + lineTagRect.bottom)/2,
+      duration : msPerChar *  lineCharCount
+    }
   });
   StartRead();
 }
 
+function AddNewLine(word, parent){
+  let new_line = document.createElement("div");
+  new_line.classList.add("read_line");
+  new_line.innerHTML = word + " ";
+  parent.appendChild(new_line);
+  return new_line;
+}
+
 function StartRead(){
-  wordIndex = 0;
-  GoToNextWord();
+  lineIndex = 0;
   window.requestAnimationFrame(ReadUpdate);
 }
 
 let lastRender = 0;
-let msSinceLastWord = 0;
-let msPerChar = 0.0;
-let wordIndex = 0;
+let msSinceLastLine = 0;
+let lineIndex = 0;
 function ReadUpdate(timestamp) {
-  if(wordIndex < words.length){
+  if(lineIndex < lines.length){
     let deltaTime = timestamp - lastRender;
     if(deltaTime < 100){
-      msSinceLastWord += deltaTime;
-      let msForWord = msPerChar * words[wordIndex-1].length;
-      //console.log("per word: " + msForWord + " the word: " + words[wordIndex-1]);
-      if(msSinceLastWord >= msForWord){
-        msSinceLastWord -= msForWord;
-        GoToNextWord();
+      msSinceLastLine += deltaTime;
+
+      let currentLine = lines[lineIndex];
+      if(msSinceLastLine >= currentLine.duration){
+        msSinceLastLine -= currentLine.duration;
+          lineIndex++;
+      } else {
+        let progress = msSinceLastLine/currentLine.duration;
+        let x = lerp(currentLine.left, currentLine.right, progress);
+        read_cursor.style.left = x +'px';
+        read_cursor.style.top = (currentLine.center -12) +'px';
       }
     }
 
@@ -57,25 +85,22 @@ function ReadUpdate(timestamp) {
   }
 }
 
-function GoToNextWord(){
-  if(wordIndex > 0){
-    let prevWordTag = word_tags[wordIndex-1];
-    prevWordTag.classList.remove("selected_word_tag");
-  }
-  let wordTag = word_tags[wordIndex];
-  //wordTag.classList.add("selected_word_tag");
-
-  let wordTagRect = wordTag.getBoundingClientRect();
-  read_cursor.style.left = wordTagRect.left +'px';
-  read_cursor.style.top = wordTagRect.top +'px';
-  //console.log("this word shown: " + wordTag.innerHTML);
-  wordIndex++;
+function ShowInfo(word_count, totalMS){
+  let totalSeconds = totalMS/1000.0;
+  let totalMinutes = Math.floor(totalSeconds/60.0);
+  let remainingSeconds = Math.round(totalSeconds - (totalMinutes * 60));
+  let text_info_tag = document.getElementById("text_info");
+  text_info_tag.innerHTML = "Word Count: " + word_count + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Time: " + totalMinutes + ":" + remainingSeconds;
 }
 
 function GetCharCount(words){
   let result = 0;
   words.forEach(function(word){
-    result += word.length;
+    result += word.length + 1;
   });
   return result;
+}
+
+function lerp (start, end, amt){
+  return (1-amt)*start+amt*end
 }
