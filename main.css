@@ -10,6 +10,9 @@ h1, h2, h3, h4, h5, h6, p, div, span, input, textarea, button {
   align-items: center;
 }
 
+textarea {
+  resize: horizontal;
+}
 
 button {
   -webkit-appearance: none;
@@ -48,12 +51,11 @@ table tr.borderless td{
 .read_line {
   font-size: 20px;
   display: inline-block;
-  padding-top:  5px;
+  padding-top:  6px;
 }
 
-#read_cursor {
+.read_highlight {
   position: absolute;
-  font-size: 30px;
-  font-weight: bold;
-  color: #6e51a9;
+  background-color: rgba(110, 81, 169, 0.3);
+  height: 26px;
 }

@@ -1,8 +1,6 @@
 let lines = [];
-let read_cursor = null;
 
 function StartReading(){
-  read_cursor = document.getElementById("read_cursor");
   let text_to_speak_box = document.getElementById("text_to_speak");
   words = text_to_speak_box.value.split(/\s+/);
   let wpm_field = document.getElementById("wpm");
@@ -35,10 +33,11 @@ function StartReading(){
   lines = lineTags.map(function(line_tag){
     let lineTagRect = line_tag.getBoundingClientRect();
     let lineCharCount = line_tag.innerHTML.length;
+    let highlightTag = AddLineHighlight(lineTagRect.left, reading_words_area);
     return {
       line_tag : line_tag,
-      left : lineTagRect.left,
-      right : lineTagRect.right,
+      highlightTag : highlightTag,
+      width : (lineTagRect.right - lineTagRect.left),
       center : (lineTagRect.top + lineTagRect.bottom)/2,
       duration : msPerChar *  lineCharCount
     }
@@ -54,6 +53,13 @@ function AddNewLine(word, parent){
   return new_line;
 }
 
+function AddLineHighlight(left, parent){
+  let newHighlight = document.createElement("div");
+  newHighlight.classList.add("read_highlight");
+  parent.appendChild(newHighlight);
+  return newHighlight;
+}
+
 function StartRead(){
   lineIndex = 0;
   window.requestAnimationFrame(ReadUpdate);
@@ -67,16 +73,16 @@ function ReadUpdate(timestamp) {
     let deltaTime = timestamp - lastRender;
     if(deltaTime < 100){
       msSinceLastLine += deltaTime;
-
       let currentLine = lines[lineIndex];
       if(msSinceLastLine >= currentLine.duration){
+        currentLine.highlightTag.style.width = currentLine.width +'px';
         msSinceLastLine -= currentLine.duration;
-          lineIndex++;
+        lineIndex++;
       } else {
         let progress = msSinceLastLine/currentLine.duration;
-        let x = lerp(currentLine.left, currentLine.right, progress);
-        read_cursor.style.left = x +'px';
-        read_cursor.style.top = (currentLine.center -12) +'px';
+        currentLine.highlightTag.style.top = (currentLine.center - 8) +'px';
+        let width = lerp(0, currentLine.width, progress);
+        currentLine.highlightTag.style.width = width +'px';
       }
     }
 
