@@ -58,4 +58,5 @@ table tr.borderless td{
   position: absolute;
   background-color: rgba(110, 81, 169, 0.3);
   height: 26px;
+  pointer-events: none;
 }

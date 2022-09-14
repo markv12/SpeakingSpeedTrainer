@@ -95,6 +95,9 @@ function ShowInfo(word_count, totalMS){
   let totalSeconds = totalMS/1000.0;
   let totalMinutes = Math.floor(totalSeconds/60.0);
   let remainingSeconds = Math.round(totalSeconds - (totalMinutes * 60));
+  if(remainingSeconds < 10){
+    remainingSeconds = "0" + remainingSeconds.toString();
+  }
   let text_info_tag = document.getElementById("text_info");
   text_info_tag.innerHTML = "Word Count: " + word_count + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Time: " + totalMinutes + ":" + remainingSeconds;
 }
