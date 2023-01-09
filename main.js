@@ -1,7 +1,7 @@
 let lines = [];
 const LINE_SEPARATOR = "_____LINE_SEPARATOR_____";
 
-function StartReading(){
+function GenerateAndStartRead(){
   let text_to_speak_box = document.getElementById("text_to_speak");
   let text_lines = text_to_speak_box.value.split(/\r?\n/);
   let words = [];
@@ -80,33 +80,53 @@ function AddLineHighlight(left, parent){
 }
 
 function StartRead(){
+  stop_read = false;
+  document.getElementById("start_button").style.display="none";
+  document.getElementById("stop_button").style.display="block";
+  lastRender = 0;
+  msSinceLastLine = 0;
   lineIndex = 0;
   window.requestAnimationFrame(ReadUpdate);
 }
 
+function StopRead(clear_highlights){
+  document.getElementById("start_button").style.display = "block";
+  document.getElementById("stop_button").style.display = "none";
+  stop_read = true;
+  if(clear_highlights){
+    document.querySelectorAll(".read_highlight").forEach(function(highlight){
+      highlight.remove();
+    });
+  }
+}
+
+let stop_read = false;
 let lastRender = 0;
 let msSinceLastLine = 0;
 let lineIndex = 0;
 function ReadUpdate(timestamp) {
-  if(lineIndex < lines.length){
-    let deltaTime = timestamp - lastRender;
-    if(deltaTime < 100){
-      msSinceLastLine += deltaTime;
-      let currentLine = lines[lineIndex];
-      if(msSinceLastLine >= currentLine.duration){
-        currentLine.highlightTag.style.width = currentLine.width +'px';
-        msSinceLastLine -= currentLine.duration;
-        lineIndex++;
-      } else {
-        let progress = msSinceLastLine/currentLine.duration;
-        currentLine.highlightTag.style.top = (currentLine.center - 8) +'px';
-        let width = lerp(0, currentLine.width, progress);
-        currentLine.highlightTag.style.width = width +'px';
+  if(!stop_read){
+    if(lineIndex < lines.length){
+      let deltaTime = timestamp - lastRender;
+      if(deltaTime < 100){
+        msSinceLastLine += deltaTime;
+        let currentLine = lines[lineIndex];
+        if(msSinceLastLine >= currentLine.duration){
+          currentLine.highlightTag.style.width = currentLine.width +'px';
+          msSinceLastLine -= currentLine.duration;
+          lineIndex++;
+        } else {
+          let progress = msSinceLastLine/currentLine.duration;
+          currentLine.highlightTag.style.top = (currentLine.center - 8) +'px';
+          let width = lerp(0, currentLine.width, progress);
+          currentLine.highlightTag.style.width = width +'px';
+        }
       }
+      lastRender = timestamp;
+      window.requestAnimationFrame(ReadUpdate);
+    } else {
+      StopRead(false);
     }
-
-    lastRender = timestamp;
-    window.requestAnimationFrame(ReadUpdate);
   }
 }
 

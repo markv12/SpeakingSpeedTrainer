@@ -25,7 +25,8 @@
         </tbody>
       </table>
       <br>
-      <button onclick="StartReading();">Start</button>
+      <button id="start_button" onclick="GenerateAndStartRead();">Start</button>
+      <button id="stop_button" style="display: none;" onclick="StopRead(true);">Stop</button>
       <br>
       <p id="text_info"></p>
       <span id="reading_words"></span>
