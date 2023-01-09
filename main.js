@@ -1,11 +1,23 @@
 let lines = [];
+const LINE_SEPARATOR = "_____LINE_SEPARATOR_____";
 
 function StartReading(){
   let text_to_speak_box = document.getElementById("text_to_speak");
-  words = text_to_speak_box.value.split(/\s+/);
+  let text_lines = text_to_speak_box.value.split(/\r?\n/);
+  let words = [];
+  let word_count = 0;
+  text_lines.forEach(function(text_line){
+    if(!isEmptyOrSpaces(text_line)){
+      let line_words = text_line.split(/\s+/);
+      words = words.concat(line_words);
+      word_count += line_words.length;
+      words.push(LINE_SEPARATOR);
+    }
+  });
+  words.pop(); //Remove last LINE_SEPARATOR
+
   let wpm_field = document.getElementById("wpm");
   let msPerWord = 60000.0/wpm.value;
-  let word_count = words.length;
   let total_char_count = GetCharCount(words);
   let totalMS = msPerWord * word_count;
   let msPerChar = totalMS / total_char_count;
@@ -18,16 +30,20 @@ function StartReading(){
   }
   let lineTags = [];
   words.forEach(function(word){
-    let current_line = lineTags[lineTags.length-1];
-    if(current_line){
-      let oldHTML = current_line.innerHTML;
-      current_line.innerHTML += word + " ";
-      if(current_line.offsetWidth >= 750){
-        current_line.innerHTML = oldHTML;
+    if(word == LINE_SEPARATOR){
+      lineTags.push(AddNewLine(null, reading_words_area));
+    } else {
+      let current_line = lineTags[lineTags.length-1];
+      if(current_line){
+        let oldHTML = current_line.innerHTML;
+        current_line.innerHTML += word + " ";
+        if(current_line.offsetWidth >= 750){
+          current_line.innerHTML = oldHTML;
+          lineTags.push(AddNewLine(word, reading_words_area));
+        }
+      } else {
         lineTags.push(AddNewLine(word, reading_words_area));
       }
-    } else {
-      lineTags.push(AddNewLine(word, reading_words_area));
     }
   });
   lines = lineTags.map(function(line_tag){
@@ -48,8 +64,11 @@ function StartReading(){
 function AddNewLine(word, parent){
   let new_line = document.createElement("div");
   new_line.classList.add("read_line");
-  new_line.innerHTML = word + " ";
+  if(word !== null){
+    new_line.innerHTML = word + " ";
+  }
   parent.appendChild(new_line);
+  parent.appendChild(document.createElement("br"));
   return new_line;
 }
 
@@ -102,10 +121,12 @@ function ShowInfo(word_count, totalMS){
   text_info_tag.innerHTML = "Word Count: " + word_count + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Time: " + totalMinutes + ":" + remainingSeconds;
 }
 
-function GetCharCount(words){
+function GetCharCount(_words){
   let result = 0;
-  words.forEach(function(word){
-    result += word.length + 1;
+  _words.forEach(function(word){
+    if(word != LINE_SEPARATOR){
+      result += word.length + 1;
+    }
   });
   return result;
 }
